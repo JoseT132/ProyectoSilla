@@ -1,0 +1,29 @@
+
+package com.mycompany.fabricasilla;
+
+
+public class Mesa {
+    private String material;
+    private int cantidadM;
+    
+    public Mesa ( String material, int cantidadM){
+        this.material= material;
+        this.cantidadM=cantidadM;
+  }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public int getCantidadM() {
+        return cantidadM;
+    }
+
+    public void setCantidadM(int cantidadM) {
+        this.cantidadM = cantidadM;
+    }
+}
