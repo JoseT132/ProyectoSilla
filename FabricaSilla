@@ -1,0 +1,217 @@
+package com.mycompany.fabricasilla;
+
+import java.util.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.*;
+
+
+public class FabricaSilla {
+
+    public static void main(String[] args) {
+        
+        Scanner dato= new Scanner (System.in);
+        int opcion;
+        do {
+        System.out.println("Bienvenido a la carpinteria");
+        System.out.println("Seleccione la operación que desea realizar");
+        System.out.println("1. Sobre la carpinteria");
+        System.out.println("2.Elaborar una silla");
+        System.out.println("3.Mostrar las sillas ensambladas, listas para barnizar");
+        System.out.println("4.Mostrar las sillas terminadas");
+        opcion=dato.nextInt();
+    
+        switch(opcion){
+            case 1:
+                infocarpinteria ();
+            break;
+            case 2:
+                ensamblarS();
+             break;
+            case 3:
+                mostrarEnsamblaje();
+            break;
+            case 4:
+                mostrarInventarioSillas();
+             break;
+            case 5:
+             break;
+            default:
+                System.out.println("Opcion no valida");
+                
+        }
+      }while(opcion !=5);         
+                
+    }
+    
+    public static void infocarpinteria () {
+    System.out.println("Carpinteria tablon");
+    System.out.println("Fundada en 1995");
+    System.out.println("6a Calle , Cdad. de Guatemala");
+  } 
+
+    
+     public static void ensamblarS(){
+     Scanner dato= new Scanner (System.in);
+     ArrayList<Silla> sillas= new ArrayList<>();
+     boolean continuar=true;
+     
+     while (continuar){
+         System.out.println ("Ingrese el tipo de madera (Pino, Cedro,Conacaste)");
+         String material = dato.nextLine();
+         System.out.println ("Ingrese la cantidad de sillas de este material");
+         int cantidad=Integer.parseInt(dato.nextLine());
+         String estado="Ensamblado";
+         
+         Silla silla= new Silla (material, cantidad,estado);
+         sillas.add(silla);
+         
+         System.out.println ("¿Desea crear otra silla ? (S/N)");
+         String opcion;
+         opcion=dato.nextLine();
+         
+        if (!opcion.equalsIgnoreCase("S")){
+            continuar=false;
+        }
+     }
+     for (Silla silla:sillas){
+         int noSillaM= silla.getCantidadS();
+         int resultado= noSillaM*silla.getCantidadS();
+         System.out.println ("Se han creado " + silla.getCantidadS()+ "sillas de " + silla.getMaterial());
+         
+         Materiales material= new Materiales(0.017 , 0.45 , 95 , 150);
+         double lb_clavos=material.getLb_clavos()*silla.getCantidadS();
+         double pies_Madera=material.getPies_Madera()*silla.getCantidadS();
+         int ml_barniz=material.getMl_barniz()*silla.getCantidadS();
+         int  ml_pegamento=material.getMl_pegamento()*silla.getCantidadS(); 
+         float costos;
+         costos=(float)(lb_clavos*0.25+pies_Madera*16+ml_barniz*0.42+ml_pegamento*0.02);
+         
+         System.out.println("Los materiales utilizados fueron: " +lb_clavos+ " libras de clavo " +pies_Madera+ " pies de madera "+ ml_barniz +" ml_barniz " +ml_pegamento+ " pegamento");
+         System.out.println("Los costos de fabricacion de: " +silla.getCantidadS()+ " sillas son de "+costos+"quetzales");
+           
+         
+         //Agrega las sillas creadas al inventario
+         String archivo="inventarioensamblaje.txt";
+         try{
+         FileWriter escritorArchivo= new FileWriter("inventarioensamblaje.txt",true);
+         BufferedWriter bufferEscritor=new BufferedWriter(escritorArchivo);
+         //Escribir en el archivo
+         
+         String Linea= silla.getCantidadS()+"%"+silla.getMaterial()+"%"+silla.getEstado();
+         bufferEscritor.write(Linea);
+         bufferEscritor.newLine();
+         System.out.println("Se han agregado las sillas al inventario de ensamblaje");
+         //cierre
+         bufferEscritor.close();
+         escritorArchivo.close();
+         }catch(IOException e){
+             System.out.println("Error al agregar el inventario");
+         }
+         
+         }
+         
+     }
+     
+     public static void mostrarEnsamblaje(){
+     Scanner dato= new Scanner (System.in);
+     String archivo="inventarioensamblaje.txt";
+     try{
+     FileReader lectorArchivo= new FileReader("inventarioensamblaje.txt");        
+     BufferedReader bufferLector = new BufferedReader(lectorArchivo);
+     String linea;
+     int i=1;
+     //Mostrar cada linea del archivo
+     while((linea =bufferLector.readLine())!=null){
+     if(linea.contains("Ensamblado")){
+         
+     System.out.println(i+". "+linea);
+     i++;
+  
+     }
+    }
+     System.out.println("¿Desea barnizar las sillas ensambladas? (S/N)");
+     String opcion=dato.nextLine();
+     if(opcion.equalsIgnoreCase("S")){
+     System.out.println("Ingrese el número de fila de sillas a barnizar");    
+     int noFila= Integer.parseInt(dato.nextLine());
+     barnizarSilla(noFila);
+     System.out.println("La fila de sillas"+noFila+"ha sido barnizada");
+       }
+     
+     bufferLector.close();
+     lectorArchivo.close();
+     }catch(IOException e){
+             System.out.println("Error al leer el inventario");
+         }
+    
+}
+     
+     public static void barnizarSilla(int noFila ){
+        Scanner dato=new Scanner(System.in);
+     
+         try {
+        File inputFile = new File("inventarioensamblaje.txt");
+        File tempFile = new File("inventarioT.txt");
+        BufferedReader lector = new BufferedReader(new FileReader(inputFile));
+        BufferedWriter escritor = new BufferedWriter(new FileWriter(tempFile));
+
+        String lineaActual;
+        int filaActual = 1;
+
+        while ((lineaActual = lector.readLine()) != null) {
+            if (filaActual == noFila) {
+                String[] arreglo = lineaActual.split("%");
+                int cantidad = Integer.parseInt(arreglo[0]);
+                String material = arreglo[1];
+                String nuevoEstado = "Barnizado";
+                String nuevaLinea = cantidad + "%" + material + "%" + nuevoEstado;
+                escritor.write(nuevaLinea);
+                escritor.newLine();
+                System.out.println("La fila de sillas  " + noFila + " ha sido barnizada.");
+            } else {
+                escritor.write(lineaActual);
+                escritor.newLine();
+            }
+            filaActual++;
+        }
+
+        lector.close();
+        escritor.close();
+        
+        
+        //cambiar nombre del archivo temporal
+        tempFile.renameTo(inputFile);
+
+    } catch (IOException e) {
+        System.out.println("Error al actualizar el archivo: " + e.getMessage());
+    }
+ }
+     public static void mostrarInventarioSillas(){
+     Scanner dato= new Scanner (System.in);
+     String archivo="inventarioT.txt";
+     try{
+     FileReader lectorArchivo= new FileReader("inventarioT.txt");        
+     BufferedReader bufferLector = new BufferedReader(lectorArchivo);
+     String linea;
+     int i=1;
+     //Mostrar cada linea del archivo
+     while((linea =bufferLector.readLine())!=null){
+     if(linea.contains("Barnizado")){
+         
+     System.out.println(i+". "+linea);
+     i++;
+  
+     }
+    }
+     }catch(IOException e){
+             System.out.println("Error al leer el inventario");
+         }
+     }
+}
+
+
+     
